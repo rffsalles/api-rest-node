@@ -1,20 +1,18 @@
 import fastify from 'fastify'
+import cookie from '@fastify/cookie'
 import { knex } from './database'	
 import crypto from 'crypto'
 import { env } from './env'
+import { transactionsRoutes } from './routes/transactions'
 
 const app = fastify()
-app.get('/', async () => {
 
-  // const tables = await knex('sqlite_schema').select('*')
-  // return tables
-  const transactions = await knex('transactions').insert({
-    id: crypto.randomUUID(),
-    title: 'Transação de Teste',
-    amount: 1000.00
-  }).returning('*')
-  return transactions
+app.addHook('preHandler',async (request,reply) => {
+    console.log(`[${request.method}] ${request.url}`)
 })
+app.register(cookie)
+app.register(transactionsRoutes,{prefix:'/transactions'})
+
 app.listen({ port: env.PORT }, (err, address) => {
   if (err) {
     console.error(err)
