@@ -11,13 +11,32 @@ describe('Transactions Routes', () => {
   })
 
   it('should be able to create a new transaction', async () => {
-    await request(app.server)
+    const response = await request(app.server)
       .post('/transactions')
       .send({
-        title: 'Salário',
+        title: 'New Transaction',
         amount: 5000,
         type: 'income'
       })
       .expect(201);
+      console.log(response.get('Set-Cookie'));
     })
+   it('should be able to list the transactions', async () => {
+    const createTransactionResponse = await request(app.server)
+      .post('/transactions')
+      .send({
+        title: 'New Transaction',
+        amount: 5000,
+        type: 'income'
+      })
+      .expect(201);    
+      const cookies = createTransactionResponse.get('Set-Cookie');
+      if (cookies) {
+        await request(app.server)
+          .get('/transactions')
+          .set('Cookie', cookies)
+          .expect(200);
+      }
+   })
+
 })
